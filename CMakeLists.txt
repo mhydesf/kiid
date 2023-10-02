@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 project(${PROJECT})
 find_package(Qt6 COMPONENTS Core Widgets Gui REQUIRED)
 
-add_subdirectory(src)
-add_subdirectory(vendor)
+add_subdirectory(vendor/json)
+include_directories(vendor/json/include)
 
 add_executable(${PROJECT} main.cpp)
 

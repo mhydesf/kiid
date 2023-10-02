@@ -7,6 +7,8 @@
 #include <QtGui/QScreen>
 #include <QtGui/QFontDatabase>
 
+#include <nlohmann/json.hpp>
+
 class SpotlightWindow : public QWidget {
 public:
     SpotlightWindow() {
