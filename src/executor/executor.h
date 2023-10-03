@@ -1,17 +1,20 @@
 #pragma once
 
-#include <mutex>
-#include <chrono>
-#include <thread>
+#include <map>
+#include <memory>
+#include <string>
 #include <functional>
-#include <condition_variable>
+#include <filesystem>
+
+#include "app.h"
 
 namespace Kiid::Executor {
 
+static const std::string DEFAULT_APP_DIR = "/usr/share/applications/";
+
 class Executor {
 public:
-    using milliseconds = std::chrono::milliseconds;
-    Executor() {}
+    Executor() { LoadApplications(); }
 
     Executor(const Executor& other) = delete;
     Executor& operator=(const Executor& other) = delete;
@@ -25,29 +28,35 @@ public:
         return *this;
     }
 
-private:
-    void Run(std::stop_token token) {
-        while (!token.stop_requested()) {
-
-            RateSleep();
+    void LoadApplications(const std::filesystem::path& path = DEFAULT_APP_DIR) {
+        if (!std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+            return;
+        }
+        for (const auto& entry : std::filesystem::directory_iterator(path)) {
+            Application app = Application::ParseApplication(entry.path().string());
+            std::shared_ptr<Application> app_ptr = std::make_shared<Application>(app);
+            m_applications.emplace(app.Name, app_ptr);
         }
     }
-    
-    void RateSleep() {
-        std::unique_lock<std::mutex> lock{m_sleep_mtx};
-        auto untilTime = m_last_rate_update + std::chrono::duration_cast<milliseconds>(m_period_ms);
-        m_sleep_cv.wait_until(lock, untilTime);
 
-        m_last_rate_update = std::chrono::steady_clock::now();
+    std::vector<std::string> GetHits(const std::string& search) {
+        std::vector<std::string> vec{};
+        for (const auto& entry : m_applications) {
+            if (entry.first.find(search) != std::string::npos) {
+                vec.push_back(entry.first);
+            }
+        }
+        return vec;
     }
 
-private:
-    std::jthread m_thread;
+    std::shared_ptr<Application> GetAppByName(const std::string& app_name) {
+        return m_applications.at(app_name);
+    }
 
-    std::mutex m_sleep_mtx;
-    std::condition_variable m_sleep_cv;
-    std::chrono::steady_clock::time_point m_last_rate_update;
-    milliseconds m_period_ms;
+    static int Execute(const std::string& cmd) { return system(cmd.c_str()); }
+
+private:
+    std::map<std::string, std::shared_ptr<Application>> m_applications;
 };
 
 } // namespace Kiid::Executor

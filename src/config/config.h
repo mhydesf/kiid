@@ -9,8 +9,7 @@ namespace Kiid::Config {
 
 using Json = nlohmann::json;
 
-class Config {
-public:
+struct Config {
     int width;
     int height;
 
@@ -24,8 +23,7 @@ public:
 
 };
 
-class ScreenConfig {
-public:
+struct ScreenConfig {
     int x_pos;
     int y_pos;
 
@@ -38,7 +36,7 @@ public:
     }
 };
 
-static Config LoadConfigFromFile(std::string& filepath) {
+static inline Config LoadConfigFromFile(std::string& filepath) {
     Json data;
     std::ifstream input_file(filepath, std::ifstream::binary);
 

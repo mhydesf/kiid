@@ -19,9 +19,14 @@ add_subdirectory(vendor/json)
 include_directories(src)
 include_directories(vendor/json/include)
 
+file(GLOB_RECURSE LIB_HEADERS "src/*.h")
+file(GLOB_RECURSE LIB_SOURCES "src/*.h")
+add_library(kiid_lib STATIC ${LIB_SOURCES} ${LIB_HEADERS})
+
 add_executable(${PROJECT} main.cpp)
 
 target_link_libraries(${PROJECT_NAME}
+    kiid_lib
     Qt6::Core
     Qt6::Widgets
     Qt6::Gui
