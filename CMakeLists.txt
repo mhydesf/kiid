@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.17)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Default build type: Debug" FORCE)
+endif()
+
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT kiid)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOUIC ON)
@@ -10,6 +16,7 @@ project(${PROJECT})
 find_package(Qt6 COMPONENTS Core Widgets Gui REQUIRED)
 
 add_subdirectory(vendor/json)
+include_directories(src)
 include_directories(vendor/json/include)
 
 add_executable(${PROJECT} main.cpp)
