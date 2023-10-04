@@ -33,7 +33,7 @@ public:
             return;
         }
         for (const auto& entry : std::filesystem::directory_iterator(path)) {
-            Application app = Application::ParseApplication(entry.path().string());
+            Application app = ParseApplication(entry.path().string());
             std::shared_ptr<Application> app_ptr = std::make_shared<Application>(app);
             if ((*app_ptr).Name.empty()) {
                 app_ptr.reset();
