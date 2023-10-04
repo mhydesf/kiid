@@ -28,14 +28,13 @@ public:
         m_search_box = new KiidSearchBox(this);
         m_results_view = new KiidResultsView(this);
         m_layout->addWidget(m_search_box);
+        m_layout->addStretch(1);
         m_layout->addWidget(m_results_view);
         SetupFonts();
 
         m_executor.LoadApplications();
 
         connect(m_search_box, &QLineEdit::textChanged, this, &KiidWindow::HandleSearch);
-
-        AdjustWindowSize(QStringList());
     }
 
 private slots:
@@ -53,8 +52,7 @@ private slots:
             m_results_view->clear();
             m_results_view->addItems(results);
         }
-
-        AdjustWindowSize(results);
+        
         results.isEmpty() ? m_results_view->hide() : m_results_view->show();
     }
 
@@ -107,16 +105,6 @@ private:
         }
     }
 
-    void AdjustWindowSize(const QStringList& results) {
-        if (results.isEmpty()) {
-            m_results_view->setVisible(false);
-            setFixedSize(m_search_box->width() + 10, m_search_box->height() + 10);
-        } else {
-            m_results_view->setVisible(true);
-            setFixedSize(m_search_box->width() + 10, m_search_box->height() + m_results_view->height() + 40);
-        }
-    }
-    
     void Execute(const QString& app_name) {
         auto app = m_executor.GetAppByName(app_name.toStdString());
         int result = (*app).Execute();
