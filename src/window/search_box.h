@@ -2,7 +2,6 @@
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QLineEdit>
-#include <QtCore/qtmetamacros.h>
 
 namespace Kiid::Window {
 
@@ -41,6 +40,7 @@ private:
         ");
         this->setFixedWidth(600);
         this->setFixedHeight(60);
+        this->setFocusPolicy(Qt::NoFocus);
     }
 };
 

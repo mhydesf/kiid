@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QtWidgets/QWidget>
 #include <QtWidgets/QListWidget>
+#include <QtWidgets/QWidget>
 
 namespace Kiid::Window {
 
@@ -40,6 +40,7 @@ private:
             font-size: 18px;                \
             padding: 5px;                   \
         ");
+        this->setFocusPolicy(Qt::NoFocus);
         this->setFixedHeight(5*24);
         this->setVisible(false);
     }

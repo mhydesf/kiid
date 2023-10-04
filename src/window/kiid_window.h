@@ -1,12 +1,12 @@
 #include <QtWidgets/QApplication>
-#include <QtGui/QScreen>
 #include <QtGui/QFontDatabase>
 #include <QtGui/QKeyEvent>
+#include <QtGui/QScreen>
 
+#include <executor/executor.h>
+#include <window/layout.h>
 #include <window/search_box.h>
 #include <window/results_view.h>
-#include <window/layout.h>
-#include <executor/executor.h>
 
 namespace Kiid::Window {
 
@@ -69,10 +69,29 @@ private slots:
             }
             break;
         case Qt::Key_Return:
-            if (m_results_view->currentItem() != nullptr) { Execute(m_results_view->currentItem()->text()); }
+            if (m_results_view->currentItem() != nullptr) {
+                Execute(m_results_view->currentItem()->text());
+            }
+            break;
+        case Qt::Key_Tab:
+        {
+            int nextRow = m_results_view->currentRow() + 1;
+            if (nextRow >= m_results_view->count()) { nextRow = 0; }
+            m_results_view->setCurrentRow(nextRow);
+            break;
+        }
+        case Qt::Key_Backtab:
+        {
+            int nextRow = m_results_view->currentRow() - 1;
+            if (nextRow < 0) { nextRow = m_results_view->count() - 1; }
+            m_results_view->setCurrentRow(nextRow);
+            break;
+        }
+        case Qt::Key_Shift:
+            // Shift key segfaults when sent to search_box :shrug:
             break;
         default:
-            QWidget::keyPressEvent(event);
+            QApplication::sendEvent(m_search_box, event);
             break;
         }
     }
