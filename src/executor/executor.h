@@ -19,11 +19,14 @@ public:
     Executor(const Executor& other) = delete;
     Executor& operator=(const Executor& other) = delete;
 
-    Executor(const Executor&& other) {}
+    Executor(const Executor&& other)
+        : m_applications{std::move(other.m_applications)} {}
+
     Executor& operator=(const Executor&& other) {
         if (this == &other) {
             return *this;
         }
+        m_applications = std::move(other.m_applications);
 
         return *this;
     }
