@@ -1,13 +1,11 @@
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QListWidget>
 #include <QtGui/QScreen>
 #include <QtGui/QFontDatabase>
 #include <QtGui/QKeyEvent>
 
-#include <QtCore/qnamespace.h>
 #include <window/search_box.h>
+#include <window/results_view.h>
+#include <window/layout.h>
 #include <executor/executor.h>
 
 namespace Kiid::Window {
@@ -21,10 +19,16 @@ public:
         this->setStyleSheet("background:transparent;");
         this->setAttribute(Qt::WA_TranslucentBackground);
         
-        SetupScreen();
-        SetupLayout();
-        SetupSearchBox();
-        SetupResultsList();
+        QScreen* screen = QGuiApplication::primaryScreen();
+        if (screen) {
+            move((screen->size().width() - width()) / 2, 400);
+        }
+        
+        m_layout = new KiidLayout(this);
+        m_search_box = new KiidSearchBox(this);
+        m_results_view = new KiidResultsView(this);
+        m_layout->addWidget(m_search_box);
+        m_layout->addWidget(m_results_view);
         SetupFonts();
 
         m_executor.LoadApplications();
@@ -55,7 +59,6 @@ private slots:
     }
 
     void keyPressEvent(QKeyEvent* event) {
-        int nextRow = m_results_view->currentRow();
         switch (event->key()) {
         case Qt::Key_Escape:
             if (m_results_view->count() > 0) {
@@ -64,16 +67,6 @@ private slots:
             } else {
                 close();
             }
-            break;
-        case Qt::Key_Tab:
-            nextRow += 1;
-            nextRow = nextRow ? nextRow >= m_results_view->count() : 0;
-            m_results_view->setCurrentRow(nextRow);
-            break;
-        case Qt::Key_Backtab:
-            nextRow -= 1;
-            nextRow = nextRow ? nextRow >= m_results_view->count() : 0;
-            m_results_view->setCurrentRow(nextRow);
             break;
         case Qt::Key_Return:
             if (m_results_view->currentItem() != nullptr) { Execute(m_results_view->currentItem()->text()); }
@@ -95,49 +88,6 @@ private:
         }
     }
 
-    void SetupScreen() {
-        m_screen = QGuiApplication::primaryScreen();
-        if (m_screen) {
-            move((m_screen->size().width() - width()) / 2, 400);
-        }
-    }
-
-    void SetupLayout() {
-        m_layout = new QVBoxLayout(this);
-        m_layout->setContentsMargins(5, 5, 5, 5);
-    }
-
-    void SetupSearchBox() {
-        m_search_box = new QLineEdit(this);
-        m_search_box->setPlaceholderText(" Kiid Search");
-        m_search_box->setStyleSheet("       \
-            background-color: white;        \
-            border: 1px solid gray;         \
-            border-radius: 10px;            \
-            font-size: 18px;                \
-            padding: 5px;                   \
-        ");
-        m_search_box->setFixedWidth(600);
-        m_search_box->setFixedHeight(60);
-        m_layout->addWidget(m_search_box);
-    }
-
-    void SetupResultsList() {
-        m_results_view = new QListWidget(this);
-        m_results_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        m_results_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        m_results_view->setStyleSheet("     \
-            background-color: white;        \
-            border: 1px solid gray;         \
-            border-radius: 10px;            \
-            font-size: 18px;                \
-            padding: 5px;                   \
-        ");
-        m_results_view->setFixedHeight(5*24);
-        m_layout->addWidget(m_results_view);
-        m_results_view->setVisible(false);
-    }
-    
     void AdjustWindowSize(const QStringList& results) {
         if (results.isEmpty()) {
             m_results_view->setVisible(false);
@@ -154,10 +104,9 @@ private:
     }
 
 private:
-    QScreen* m_screen;
-    QVBoxLayout* m_layout;
-    QLineEdit* m_search_box;
-    QListWidget* m_results_view;
+    KiidLayout* m_layout;
+    KiidSearchBox* m_search_box;
+    KiidResultsView* m_results_view;
 
     Kiid::Executor::Executor m_executor{};
 };

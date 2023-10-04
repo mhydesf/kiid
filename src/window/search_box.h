@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtWidgets/QWidget>
 #include <QtWidgets/QLineEdit>
 #include <QtCore/qtmetamacros.h>
 
@@ -7,8 +8,13 @@ namespace Kiid::Window {
 
 class KiidSearchBox : public QLineEdit {
     Q_OBJECT
+
 public:
-    KiidSearchBox() {}
+    KiidSearchBox(QWidget* parent = nullptr)
+        : QLineEdit(parent)
+    {
+        Setup();
+    }
     ~KiidSearchBox() {}
 
     KiidSearchBox(const KiidSearchBox& other) = delete;
@@ -21,6 +27,20 @@ public:
         }
 
         return *this;
+    }
+
+private:
+    void Setup() {
+        this->setPlaceholderText(" Kiid Search");
+        this->setStyleSheet("       \
+            background-color: white;        \
+            border: 1px solid gray;         \
+            border-radius: 10px;            \
+            font-size: 18px;                \
+            padding: 5px;                   \
+        ");
+        this->setFixedWidth(600);
+        this->setFixedHeight(60);
     }
 };
 
