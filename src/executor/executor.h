@@ -42,7 +42,7 @@ public:
     std::vector<std::string> GetHits(const std::string& search) {
         std::vector<std::string> vec{};
         for (const auto& entry : m_applications) {
-            if (entry.first.find(search) != std::string::npos) {
+            if (toLower(entry.first).find(toLower(search)) != std::string::npos) {
                 vec.push_back(entry.first);
             }
         }
@@ -51,6 +51,13 @@ public:
 
     std::shared_ptr<Application> GetAppByName(const std::string& app_name) {
         return m_applications.at(app_name);
+    }
+
+    static std::string toLower(const std::string& str) {
+        std::string lower = str;
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        return lower;
     }
 
     static int Execute(const std::string& cmd) { return system(cmd.c_str()); }
