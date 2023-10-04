@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+add_compile_options(-fPIC)
 
 project(${PROJECT})
 find_package(Qt6 COMPONENTS Core Widgets Gui REQUIRED)
