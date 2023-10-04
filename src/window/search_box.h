@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QLineEdit>
+#include <config/config.h>
 
 namespace Kiid::Window {
 
@@ -9,10 +10,13 @@ class KiidSearchBox : public QLineEdit {
     Q_OBJECT
 
 public:
-    KiidSearchBox(QWidget* parent = nullptr)
+    using SearchBoxConfig = Config::SearchBoxConfig;
+
+    KiidSearchBox(const SearchBoxConfig& config,
+                  QWidget* parent = nullptr)
         : QLineEdit(parent)
     {
-        Setup();
+        Setup(config);
     }
     ~KiidSearchBox() {}
 
@@ -29,17 +33,11 @@ public:
     }
 
 private:
-    void Setup() {
-        this->setPlaceholderText(" Kiid Search");
-        this->setStyleSheet("       \
-            background-color: white;        \
-            border: 1px solid gray;         \
-            border-radius: 10px;            \
-            font-size: 18px;                \
-            padding: 5px;                   \
-        ");
-        this->setFixedWidth(600);
-        this->setFixedHeight(60);
+    void Setup(const SearchBoxConfig& config) {
+        this->setPlaceholderText(config.text.c_str());
+        this->setStyleSheet(config.cs_string.c_str());
+        this->setFixedWidth(config.width);
+        this->setFixedHeight(config.height);
         this->setFocusPolicy(Qt::NoFocus);
     }
 };

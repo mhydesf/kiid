@@ -33,7 +33,7 @@ private:
     void Setup() {
         this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        this->setStyleSheet("     \
+        this->setStyleSheet("               \
             background-color: white;        \
             border: 1px solid gray;         \
             border-radius: 10px;            \
@@ -41,7 +41,7 @@ private:
             padding: 5px;                   \
         ");
         this->setFocusPolicy(Qt::NoFocus);
-        this->setFixedHeight(5*24);
+        this->setFixedHeight(5*25);
         this->setVisible(false);
     }
 };
