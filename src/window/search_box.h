@@ -14,7 +14,8 @@ public:
 
     KiidSearchBox(const SearchBoxConfig& config,
                   QWidget* parent = nullptr)
-        : QLineEdit(parent)
+        : m_config{std::move(config)}
+        , QLineEdit(parent)
     {
         Setup(config);
     }
@@ -40,6 +41,8 @@ private:
         this->setFixedHeight(config.height);
         this->setFocusPolicy(Qt::NoFocus);
     }
+
+    SearchBoxConfig m_config;
 };
 
 } // namespace Kiid::Window

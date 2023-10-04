@@ -14,7 +14,9 @@ class KiidWindow : public QWidget {
     Q_OBJECT
 
 public:
-    KiidWindow() {
+    using Config = Config::Config;
+
+    KiidWindow(const Config& config) {
         setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         this->setStyleSheet("background:transparent;");
         this->setAttribute(Qt::WA_TranslucentBackground);
@@ -23,11 +25,10 @@ public:
         if (screen) {
             move((screen->size().width() - width()) / 2, 400);
         }
-        Config::Json sb_config{};
-        auto config = Config::SearchBoxConfig::Load(sb_config);
+
         m_layout = new KiidLayout(this);
-        m_search_box = new KiidSearchBox(config, this);
-        m_results_view = new KiidResultsView(this);
+        m_search_box = new KiidSearchBox(config.sb_config, this);
+        m_results_view = new KiidResultsView(config.rv_config, this);
         m_layout->addWidget(m_search_box);
         m_layout->addStretch(1);
         m_layout->addWidget(m_results_view);
