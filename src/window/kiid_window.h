@@ -100,7 +100,8 @@ private:
     
     void Execute(const QString& app_name) {
         auto app = m_executor.GetAppByName(app_name.toStdString());
-        (*app).Execute();
+        int result = (*app).Execute();
+        if (!result) { close(); }
     }
 
 private:

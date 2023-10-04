@@ -60,7 +60,10 @@ public:
         return lower;
     }
 
-    static int Execute(const std::string& cmd) { return system(cmd.c_str()); }
+    static int Execute(const std::string& cmd) {
+        std::string bg_cmd = cmd + " &";
+        return system(bg_cmd.c_str());
+    }
 
 private:
     std::map<std::string, std::shared_ptr<Application>> m_applications;

@@ -47,7 +47,10 @@ struct Application {
         return app;
     }
 
-    int Execute() { return system(Exec.c_str()); }
+    int Execute() {
+        const std::string cmd = Exec + " &";
+        return system(cmd.c_str());
+    }
 };
 
 } // namespace Kiid::Executor
