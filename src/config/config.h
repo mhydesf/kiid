@@ -217,8 +217,18 @@ struct Config {
 
 };
 
-static inline Config LoadConfigFromFile(std::string& filepath) {
+static inline std::string LoadConfigPath() {
+    std::string defaultConfigPath = std::string(std::getenv("HOME")) + "/.config";
+    const char* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
+
+    std::string configDir = xdgConfigHome ? xdgConfigHome : defaultConfigPath;
+    std::filesystem::path filepath = configDir + "/kiid/config.json";
+    return filepath.string();
+}
+
+static inline Config LoadConfigFromFile() {
     Json data;
+    std::string filepath = LoadConfigPath();
     std::ifstream input_file(filepath, std::ifstream::binary);
 
     if (input_file.is_open()) {
