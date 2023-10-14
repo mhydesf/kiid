@@ -42,6 +42,7 @@ private:
         this->setFocusPolicy(Qt::NoFocus);
     }
 
+private:
     SearchBoxConfig m_config;
 };
 
