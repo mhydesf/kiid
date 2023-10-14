@@ -38,7 +38,7 @@ private:
     void Setup(const ResultsViewConfig& config) {
         this->setVerticalScrollBarPolicy(config.v_scroll_bar);
         this->setHorizontalScrollBarPolicy(config.h_scroll_bar);
-        this->setStyleSheet(config.cs_string.c_str());
+        this->setStyleSheet(config.cs_string);
         this->setFocusPolicy(Qt::NoFocus);
         this->setFixedHeight(config.num_items * (config.font_size + config.padding));
         this->setVisible(false);

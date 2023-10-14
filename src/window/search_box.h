@@ -35,8 +35,8 @@ public:
 
 private:
     void Setup(const SearchBoxConfig& config) {
-        this->setPlaceholderText(config.text.c_str());
-        this->setStyleSheet(config.cs_string.c_str());
+        this->setPlaceholderText(config.text);
+        this->setStyleSheet(config.cs_string);
         this->setFixedWidth(config.width);
         this->setFixedHeight(config.height);
         this->setFocusPolicy(Qt::NoFocus);

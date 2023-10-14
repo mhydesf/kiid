@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
+#include <QtCore/QString>
 #include <QtCore/qnamespace.h>
 
 namespace Kiid::Config {
@@ -18,11 +19,11 @@ struct SearchBoxConfig {
     int brd_radius;
     int font_size;
     int padding;
-    std::string bg_color;
-    std::string brd_color;
-    std::string text;
 
-    std::string cs_string;
+    QString bg_color;
+    QString brd_color;
+    QString text;
+    QString cs_string;
 
     static SearchBoxConfig Load(const Json& json) {
         SearchBoxConfig config;
@@ -32,9 +33,12 @@ struct SearchBoxConfig {
         config.brd_radius = json.contains("brd_radius") ? json.at("brd_radius").get<int>() : 10;
         config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
         config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
-        config.bg_color = json.contains("bg_color") ? json.at("bg_color").get<std::string>() : "white";
-        config.brd_color = json.contains("brd_color") ? json.at("brd_color").get<std::string>() : "gray";
-        config.text = json.contains("text") ? json.at("text").get<std::string>() : " Kiid Search";
+        config.bg_color = json.contains("bg_color")
+            ? QString::fromStdString(json.at("bg_color").get<std::string>()) : "white";
+        config.brd_color = json.contains("brd_color")
+            ? QString::fromStdString(json.at("brd_color").get<std::string>()) : "gray";
+        config.text = json.contains("text")
+            ? QString::fromStdString(json.at("text").get<std::string>()) : " Kiid Search";
         config.cs_string = config.CreateCSString(); 
 
         return config;
@@ -56,21 +60,20 @@ struct SearchBoxConfig {
         return config;
     }
 
-    std::string CreateCSString() {
-        std::string str = fmt::format("\
-            background-color: {};       \
-            border: {}px solid {};      \
-            border-radius: {}px;        \
-            font-size: {};              \
-            padding: {};                \
-        ",
-        bg_color,
-        brd_width,
-        brd_color,
-        brd_radius,
-        font_size,
-        padding);
-        return str;
+    QString CreateCSString() {
+        return QString("QLineEdit {"
+                       "background-color: %1;"
+                       "border: %2px solid %3;"
+                       "border-radius: %4px;"
+                       "font-size: %5px;"
+                       "padding: %6px;"
+                       "}")
+            .arg(bg_color)
+            .arg(brd_width)
+            .arg(brd_color)
+            .arg(brd_radius)
+            .arg(font_size)
+            .arg(padding);
     }
 };
 
@@ -80,9 +83,10 @@ struct ResultsViewConfig {
     int font_size;
     int padding;
     int num_items;
-    std::string bg_color;
-    std::string brd_color;
-    std::string cs_string;
+
+    QString bg_color;
+    QString brd_color;
+    QString cs_string;
     Qt::ScrollBarPolicy v_scroll_bar = Qt::ScrollBarAlwaysOff;
     Qt::ScrollBarPolicy h_scroll_bar = Qt::ScrollBarAlwaysOff;
 
@@ -93,8 +97,10 @@ struct ResultsViewConfig {
         config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
         config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
         config.num_items = json.contains("num_items") ? json.at("num_items").get<int>() : 5;
-        config.bg_color = json.contains("bg_color") ? json.at("bg_color").get<std::string>() : "white";
-        config.brd_color = json.contains("brd_color") ? json.at("brd_color").get<std::string>() : "gray";
+        config.bg_color = json.contains("bg_color")
+            ? QString::fromStdString(json.at("bg_color").get<std::string>()) : "white";
+        config.brd_color = json.contains("brd_color")
+            ? QString::fromStdString(json.at("brd_color").get<std::string>()) : "gray";
         if (json.contains("v_scroll_bar")) {
             config.v_scroll_bar = json.at("v_scroll_bar") ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
         }
@@ -122,21 +128,21 @@ struct ResultsViewConfig {
         return config;
     }
 
-    std::string CreateCSString() {
-        std::string str = fmt::format("\
-            background-color: white;   \
-            border: 1px solid gray;    \
-            border-radius: 10px;       \
-            font-size: 18px;           \
-            padding: 5px;              \
-        ",
-        bg_color,
-        brd_width,
-        brd_color,
-        brd_radius,
-        font_size,
-        padding);
-        return str;
+    QString CreateCSString() {
+        return QString(
+            "QListWidget {"
+            "background-color: %1; "
+            "border: %2px solid %3; "
+            "border-radius: %4px; "
+            "font-size: %5px; "
+            "padding: %6px;"
+            "}")
+        .arg(bg_color)
+        .arg(brd_width)
+        .arg(brd_color)
+        .arg(brd_radius)
+        .arg(font_size)
+        .arg(padding);
     };
 };
 
