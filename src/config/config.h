@@ -137,12 +137,71 @@ struct ResultsViewConfig {
         font_size,
         padding);
         return str;
+    };
+};
+
+struct ScreenConfig {
+    /**
+     *  Position is in pixels relative to the top right corner.
+     *          
+     *             -> +h
+     *           | --------------------
+     *           v |
+     *          +v |
+     *             |        SCREEN
+     *             |
+     *
+     *  Special codes to execute functions
+     *      -1 = middle
+     *      -2 = h -> left  | v -> top
+     *      -3 = h -> right | v -> bottom
+     */
+    int p_horizontal;
+    int p_vertical;
+
+    static ScreenConfig Load(const Json& json) {
+        ScreenConfig config;
+        if (json.contains("p_horizontal")) {
+            if (json.at("p_horizontal").is_number_integer()) {
+                config.p_horizontal = json.at("p_horizontal").get<int>();
+            } else {
+                if (json.at("p_horizontal") == "middle") { config.p_horizontal = -1; }
+                if (json.at("p_horizontal") == "left") { config.p_horizontal = -2; }
+                if (json.at("p_horizontal") == "right") { config.p_horizontal = -3; }
+            }
+        } else {
+            config.p_horizontal = -1;
+        }
+        if (json.contains("p_vertical")) {
+            if (json.at("p_vertical").is_number_integer()) {
+                config.p_vertical = json.at("p_vertical").get<int>();
+            } else {
+                if (json.at("p_vertical") == "middle") { config.p_vertical = -1; }
+                if (json.at("p_vertical") == "top") { config.p_vertical = -2; }
+                if (json.at("p_vertical") == "bottom") { config.p_vertical = -3; }
+            }
+        } else {
+            config.p_vertical = -1;
+        }
+        config.p_horizontal = json.contains("p_horizontal") ? json.at("p_horizontal").get<int>() : 1;
+        config.p_vertical = json.contains("p_vertical") ? json.at("p_vertical").get<int>() : 10;
+
+        return config;
+    }
+
+    static ScreenConfig Default() {
+        ScreenConfig config;
+        config.p_horizontal = -1;
+        config.p_vertical = -1;
+
+        return config;
     }
 };
 
 struct Config {
     SearchBoxConfig sb_config;
     ResultsViewConfig rv_config;
+    ScreenConfig screen_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
@@ -150,6 +209,8 @@ struct Config {
                                 : SearchBoxConfig::Default();
         config.rv_config = json.contains("results_view") ? ResultsViewConfig::Load(json.at("results_view"))
                                 : ResultsViewConfig::Default();
+        config.screen_config = json.contains("screen") ? ScreenConfig::Load(json.at("screen"))
+                                : ScreenConfig::Default();
 
         return config;
     }
