@@ -102,10 +102,12 @@ struct ResultsViewConfig {
         config.brd_color = json.contains("brd_color")
             ? QString::fromStdString(json.at("brd_color").get<std::string>()) : "gray";
         if (json.contains("v_scroll_bar")) {
-            config.v_scroll_bar = json.at("v_scroll_bar") ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
+            config.v_scroll_bar = json.at("v_scroll_bar")
+                ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
         }
         if (json.contains("h_scroll_bar")) {
-            config.h_scroll_bar = json.at("h_scroll_bar") ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
+            config.h_scroll_bar = json.at("h_scroll_bar")
+                ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
         }
         config.cs_string = config.CreateCSString();
 
