@@ -99,7 +99,7 @@ private slots:
 
 private:
     void SetupFonts(const Kiid::Config::FontConfig& config) {
-        ShowAvailableFonts();
+        // ShowAvailableFonts();
         m_search_box->setFont(config.font_name);
         m_results_view->setFont(config.font_name);
     }
