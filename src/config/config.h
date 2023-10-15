@@ -208,7 +208,6 @@ struct ScreenConfig {
 
 struct FontConfig {
     QString font_name;
-    int font_size;
 
     static FontConfig Load(const Json& json) {
         FontConfig config;
@@ -220,7 +219,6 @@ struct FontConfig {
     static FontConfig Default() {
         FontConfig config;
         config.font_name = "Monospace";
-        config.font_size = 18;
         return config;
     }
 };
