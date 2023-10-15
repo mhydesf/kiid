@@ -21,6 +21,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/vendor)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/vendor/json/include)
 include_directories(${PROJECT_SOURCE_DIR}/vendor/fmt/include)
+include_directories(/usr/include/x86_64-linux-gnu/qt6/)
 
 file(GLOB_RECURSE LIB_HEADERS "src/*.h")
 file(GLOB_RECURSE LIB_SOURCES "src/*.h")
