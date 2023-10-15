@@ -28,7 +28,7 @@ public:
         m_layout->addStretch(1);
         m_layout->addWidget(m_results_view);
         m_screen = new KiidScreen(m_search_box);
-        SetupFonts();
+        SetupFonts(config.font_config);
 
         m_executor.LoadApplications();
 
@@ -98,13 +98,17 @@ private slots:
     }
 
 private:
-    void SetupFonts() {
-        int fontId = QFontDatabase::addApplicationFont("/home/mhyde/.local/share/fonts/FiraMonoNerdFontMono-Medium.otf");
-        if (fontId != -1) {
-            QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
-            QFont font(family);
-            m_search_box->setFont(font);
-            m_results_view->setFont(font);
+    void SetupFonts(const Kiid::Config::FontConfig& config) {
+        ShowAvailableFonts();
+        m_search_box->setFont(config.font_name);
+        m_results_view->setFont(config.font_name);
+    }
+
+    void ShowAvailableFonts() {
+        QStringList fontFamilies = QFontDatabase::families();
+
+        for(const QString& family : fontFamilies) {
+            qDebug() << "Available font:" << family;
         }
     }
 

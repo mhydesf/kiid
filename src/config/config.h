@@ -206,10 +206,29 @@ struct ScreenConfig {
     }
 };
 
+struct FontConfig {
+    QString font_name;
+    int font_size;
+
+    static FontConfig Load(const Json& json) {
+        FontConfig config;
+        config.font_name = json.contains("font_name")
+            ? QString::fromStdString(json.at("font_name").get<std::string>()) : "Monospace";
+        return config;
+    }
+
+    static FontConfig Default() {
+        FontConfig config;
+        config.font_name = "Monospace";
+        config.font_size = 18;
+        return config;
+    }
+};
 struct Config {
     SearchBoxConfig sb_config;
     ResultsViewConfig rv_config;
     ScreenConfig screen_config;
+    FontConfig font_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
@@ -219,6 +238,8 @@ struct Config {
                                 : ResultsViewConfig::Default();
         config.screen_config = json.contains("screen") ? ScreenConfig::Load(json.at("screen"))
                                 : ScreenConfig::Default();
+        config.font_config = json.contains("font") ? FontConfig::Load(json.at("font"))
+                                : FontConfig::Default();
 
         return config;
     }
