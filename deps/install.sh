@@ -11,5 +11,7 @@ sudo apt-get -y install     \
     libxrender-dev          \
     libxi-dev               \
     libxkbcommon-dev        \
-    libxkbcommon-x11-dev
+    libxkbcommon-x11-dev    \
+    qt6-base-dev            \
+    qt6-wayland
 
