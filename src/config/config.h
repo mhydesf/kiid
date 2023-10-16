@@ -12,6 +12,33 @@ namespace Kiid::Config {
 
 using Json = nlohmann::json;
 
+struct ColorConfig {
+    int r;
+    int g;
+    int b;
+    float opacity;
+
+    static ColorConfig Load(const Json& json) {
+        ColorConfig config;
+        config.r = json.contains("r") ? json.at("r").get<int>() : 0;
+        config.g = json.contains("g") ? json.at("g").get<int>() : 0;
+        config.b = json.contains("b") ? json.at("b").get<int>() : 0;
+        config.opacity = json.contains("opacity") ? json.at("opacity").get<float>() : 1.0;
+
+        return config;
+    }
+
+    static ColorConfig Default(const int r, const int g, const int b) {
+        ColorConfig config;
+        config.r = r;
+        config.g = g;
+        config.b = b;
+        config.opacity = 1.0;
+
+        return config;
+    }
+};
+
 struct SearchBoxConfig {
     int width;
     int height;
@@ -20,8 +47,9 @@ struct SearchBoxConfig {
     int font_size;
     int padding;
 
-    QString bg_color;
-    QString brd_color;
+    ColorConfig bg_color;
+    ColorConfig brd_color;
+
     QString text;
     QString cs_string;
 
@@ -33,12 +61,16 @@ struct SearchBoxConfig {
         config.brd_radius = json.contains("brd_radius") ? json.at("brd_radius").get<int>() : 10;
         config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
         config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
+        
         config.bg_color = json.contains("bg_color")
-            ? QString::fromStdString(json.at("bg_color").get<std::string>()) : "white";
+            ? ColorConfig::Load(json.at("bg_color")) : ColorConfig::Default(255,255,255);
+        
         config.brd_color = json.contains("brd_color")
-            ? QString::fromStdString(json.at("brd_color").get<std::string>()) : "gray";
+            ? ColorConfig::Load(json.at("brd_color")) : ColorConfig::Default(0,0,0);
+        
         config.text = json.contains("text")
             ? QString::fromStdString(json.at("text").get<std::string>()) : " Kiid Search";
+        
         config.cs_string = config.CreateCSString(); 
 
         return config;
@@ -52,8 +84,8 @@ struct SearchBoxConfig {
         config.brd_radius = 10;
         config.font_size = 18;
         config.padding = 5;
-        config.bg_color = "white";
-        config.brd_color = "gray";
+        config.bg_color = ColorConfig::Default(255,255,255);
+        config.brd_color = ColorConfig::Default(0,0,0);
         config.text = " Kiid Search";
         config.cs_string = config.CreateCSString(); 
 
@@ -61,19 +93,27 @@ struct SearchBoxConfig {
     }
 
     QString CreateCSString() {
-        return QString("QLineEdit {"
-                       "background-color: %1;"
-                       "border: %2px solid %3;"
-                       "border-radius: %4px;"
-                       "font-size: %5px;"
-                       "padding: %6px;"
-                       "}")
-            .arg(bg_color)
-            .arg(brd_width)
-            .arg(brd_color)
-            .arg(brd_radius)
-            .arg(font_size)
-            .arg(padding);
+        return QString(
+            "QLineEdit {"
+                "background-color: rgba(%1, %2, %3, %4);"
+                "border: %5px solid rgba(%6, %7, %8, %9);"
+                "border-radius: %10px;"
+                "padding: %11px;"
+                "font-size: %12px;"
+            "}"
+        )
+        .arg(bg_color.r)
+        .arg(bg_color.g)
+        .arg(bg_color.b)
+        .arg(bg_color.opacity)
+        .arg(brd_width)
+        .arg(brd_color.r)
+        .arg(brd_color.g)
+        .arg(brd_color.b)
+        .arg(brd_color.opacity)
+        .arg(brd_radius)
+        .arg(padding)
+        .arg(font_size);
     }
 };
 
@@ -84,8 +124,9 @@ struct ResultsViewConfig {
     int padding;
     int num_items;
 
-    QString bg_color;
-    QString brd_color;
+    ColorConfig bg_color;
+    ColorConfig brd_color;
+
     QString cs_string;
     Qt::ScrollBarPolicy v_scroll_bar = Qt::ScrollBarAlwaysOff;
     Qt::ScrollBarPolicy h_scroll_bar = Qt::ScrollBarAlwaysOff;
@@ -97,18 +138,23 @@ struct ResultsViewConfig {
         config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
         config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
         config.num_items = json.contains("num_items") ? json.at("num_items").get<int>() : 5;
+        
         config.bg_color = json.contains("bg_color")
-            ? QString::fromStdString(json.at("bg_color").get<std::string>()) : "white";
+            ? ColorConfig::Load(json.at("bg_color")) : ColorConfig::Default(255,255,255);
+        
         config.brd_color = json.contains("brd_color")
-            ? QString::fromStdString(json.at("brd_color").get<std::string>()) : "gray";
+            ? ColorConfig::Load(json.at("brd_color")) : ColorConfig::Default(0,0,0);
+        
         if (json.contains("v_scroll_bar")) {
             config.v_scroll_bar = json.at("v_scroll_bar")
                 ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
         }
+        
         if (json.contains("h_scroll_bar")) {
             config.h_scroll_bar = json.at("h_scroll_bar")
                 ? Qt::ScrollBarAlwaysOn : Qt::ScrollBarAlwaysOff;
         }
+        
         config.cs_string = config.CreateCSString();
 
         return config;
@@ -121,8 +167,8 @@ struct ResultsViewConfig {
         config.font_size = 18;
         config.padding = 5;
         config.num_items = 5;
-        config.bg_color = "white";
-        config.brd_color = "gray";
+        config.bg_color = ColorConfig::Default(255,255,255);
+        config.brd_color = ColorConfig::Default(0,0,0);
         config.cs_string = config.CreateCSString();
         config.v_scroll_bar = Qt::ScrollBarAlwaysOff;
         config.h_scroll_bar = Qt::ScrollBarAlwaysOff;
@@ -133,18 +179,25 @@ struct ResultsViewConfig {
     QString CreateCSString() {
         return QString(
             "QListWidget {"
-            "background-color: %1; "
-            "border: %2px solid %3; "
-            "border-radius: %4px; "
-            "font-size: %5px; "
-            "padding: %6px;"
-            "}")
-        .arg(bg_color)
+                "background-color: rgba(%1, %2, %3, %4);"
+                "border: %5px solid rgba(%6, %7, %8, %9);"
+                "border-radius: %10px;"
+                "padding: %11px;"
+                "font-size: %12px;"
+            "}"
+        )
+        .arg(bg_color.r)
+        .arg(bg_color.g)
+        .arg(bg_color.b)
+        .arg(bg_color.opacity)
         .arg(brd_width)
-        .arg(brd_color)
+        .arg(brd_color.r)
+        .arg(brd_color.g)
+        .arg(brd_color.b)
+        .arg(brd_color.opacity)
         .arg(brd_radius)
-        .arg(font_size)
-        .arg(padding);
+        .arg(padding)
+        .arg(font_size);
     };
 };
 
