@@ -12,6 +12,11 @@ namespace Kiid::Config {
 
 using Json = nlohmann::json;
 
+template <typename T>
+T LoadFromJsonField(const Json& json, const std::string& key, const T& _default) {
+    return json.contains(key) ? json.at(key).get<T>() : _default;
+}
+
 struct ColorConfig {
     int r;
     int g;
@@ -20,10 +25,10 @@ struct ColorConfig {
 
     static ColorConfig Load(const Json& json) {
         ColorConfig config;
-        config.r = json.contains("r") ? json.at("r").get<int>() : 0;
-        config.g = json.contains("g") ? json.at("g").get<int>() : 0;
-        config.b = json.contains("b") ? json.at("b").get<int>() : 0;
-        config.opacity = json.contains("opacity") ? json.at("opacity").get<float>() : 1.0;
+        config.r = LoadFromJsonField(json, "r", 0);
+        config.g = LoadFromJsonField(json, "g", 0);
+        config.b = LoadFromJsonField(json, "b", 0);
+        config.opacity = LoadFromJsonField(json, "opacity", 1.0f);
 
         return config;
     }
@@ -39,6 +44,9 @@ struct ColorConfig {
     }
 };
 
+const ColorConfig DEFAULT_COLOR_WHITE = {255, 255, 255, 1.0f};
+const ColorConfig DEFAULT_COLOR_BLACK = {0, 0, 0, 1.0f};
+
 struct SearchBoxConfig {
     int width;
     int height;
@@ -49,25 +57,29 @@ struct SearchBoxConfig {
 
     ColorConfig bg_color;
     ColorConfig brd_color;
+    ColorConfig text_color;
 
     QString text;
     QString cs_string;
 
     static SearchBoxConfig Load(const Json& json) {
         SearchBoxConfig config;
-        config.width = json.contains("width") ? json.at("width").get<int>() : 600;
-        config.height = json.contains("height") ? json.at("height").get<int>() : 60;
-        config.brd_width = json.contains("brd_width") ? json.at("brd_width").get<int>() : 1;
-        config.brd_radius = json.contains("brd_radius") ? json.at("brd_radius").get<int>() : 10;
-        config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
-        config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
+        config.width = LoadFromJsonField(json, "width", 600);
+        config.height = LoadFromJsonField(json, "height", 60);
+        config.brd_width = LoadFromJsonField(json, "brd_width", 1);
+        config.brd_radius = LoadFromJsonField(json, "brd_radius", 10);
+        config.font_size = LoadFromJsonField(json, "font_size", 18);
+        config.padding = LoadFromJsonField(json, "paddings", 5);
         
         config.bg_color = json.contains("bg_color")
-            ? ColorConfig::Load(json.at("bg_color")) : ColorConfig::Default(255,255,255);
+            ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
         
         config.brd_color = json.contains("brd_color")
-            ? ColorConfig::Load(json.at("brd_color")) : ColorConfig::Default(0,0,0);
+            ? ColorConfig::Load(json.at("brd_color")) : DEFAULT_COLOR_BLACK;
         
+        config.text_color = json.contains("text_color")
+            ? ColorConfig::Load(json.at("text_color")) : DEFAULT_COLOR_BLACK;
+
         config.text = json.contains("text")
             ? QString::fromStdString(json.at("text").get<std::string>()) : " Kiid Search";
         
@@ -84,8 +96,9 @@ struct SearchBoxConfig {
         config.brd_radius = 10;
         config.font_size = 18;
         config.padding = 5;
-        config.bg_color = ColorConfig::Default(255,255,255);
-        config.brd_color = ColorConfig::Default(0,0,0);
+        config.bg_color = DEFAULT_COLOR_WHITE;
+        config.brd_color = DEFAULT_COLOR_BLACK;
+        config.text_color = DEFAULT_COLOR_BLACK;
         config.text = " Kiid Search";
         config.cs_string = config.CreateCSString(); 
 
@@ -100,6 +113,7 @@ struct SearchBoxConfig {
                 "border-radius: %10px;"
                 "padding: %11px;"
                 "font-size: %12px;"
+                "color: rgb(%13, %14, %15)"
             "}"
         )
         .arg(bg_color.r)
@@ -113,7 +127,10 @@ struct SearchBoxConfig {
         .arg(brd_color.opacity)
         .arg(brd_radius)
         .arg(padding)
-        .arg(font_size);
+        .arg(font_size)
+        .arg(text_color.r)
+        .arg(text_color.g)
+        .arg(text_color.b);
     }
 };
 
@@ -126,6 +143,7 @@ struct ResultsViewConfig {
 
     ColorConfig bg_color;
     ColorConfig brd_color;
+    ColorConfig text_color;
 
     QString cs_string;
     Qt::ScrollBarPolicy v_scroll_bar = Qt::ScrollBarAlwaysOff;
@@ -133,17 +151,20 @@ struct ResultsViewConfig {
 
     static ResultsViewConfig Load(const Json& json) {
         ResultsViewConfig config;
-        config.brd_width = json.contains("brd_width") ? json.at("brd_width").get<int>() : 1;
-        config.brd_radius = json.contains("brd_radius") ? json.at("brd_radius").get<int>() : 10;
-        config.font_size = json.contains("font_size") ? json.at("font_size").get<int>() : 18;
-        config.padding = json.contains("padding") ? json.at("padding").get<int>() : 5;
-        config.num_items = json.contains("num_items") ? json.at("num_items").get<int>() : 5;
+        config.brd_width = LoadFromJsonField(json, "brd_width", 1);
+        config.brd_radius = LoadFromJsonField(json, "brd_radius", 10);
+        config.font_size = LoadFromJsonField(json, "font_size", 18);
+        config.padding = LoadFromJsonField(json, "padding", 5);
+        config.num_items = LoadFromJsonField(json, "num_items", 5);
         
         config.bg_color = json.contains("bg_color")
-            ? ColorConfig::Load(json.at("bg_color")) : ColorConfig::Default(255,255,255);
+            ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
         
         config.brd_color = json.contains("brd_color")
-            ? ColorConfig::Load(json.at("brd_color")) : ColorConfig::Default(0,0,0);
+            ? ColorConfig::Load(json.at("brd_color")) : DEFAULT_COLOR_BLACK;
+        
+        config.text_color = json.contains("text_color")
+            ? ColorConfig::Load(json.at("text_color")) : DEFAULT_COLOR_BLACK;
         
         if (json.contains("v_scroll_bar")) {
             config.v_scroll_bar = json.at("v_scroll_bar")
@@ -167,8 +188,9 @@ struct ResultsViewConfig {
         config.font_size = 18;
         config.padding = 5;
         config.num_items = 5;
-        config.bg_color = ColorConfig::Default(255,255,255);
-        config.brd_color = ColorConfig::Default(0,0,0);
+        config.bg_color = DEFAULT_COLOR_WHITE;
+        config.brd_color = DEFAULT_COLOR_BLACK;
+        config.text_color = DEFAULT_COLOR_BLACK;
         config.cs_string = config.CreateCSString();
         config.v_scroll_bar = Qt::ScrollBarAlwaysOff;
         config.h_scroll_bar = Qt::ScrollBarAlwaysOff;
@@ -185,6 +207,9 @@ struct ResultsViewConfig {
                 "padding: %11px;"
                 "font-size: %12px;"
             "}"
+            "QListWidget::item {"
+                "color: rgb(%13, %14, %15)"
+            "}"
         )
         .arg(bg_color.r)
         .arg(bg_color.g)
@@ -197,7 +222,10 @@ struct ResultsViewConfig {
         .arg(brd_color.opacity)
         .arg(brd_radius)
         .arg(padding)
-        .arg(font_size);
+        .arg(font_size)
+        .arg(text_color.r)
+        .arg(text_color.g)
+        .arg(text_color.b);
     };
 };
 
