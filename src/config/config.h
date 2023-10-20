@@ -44,8 +44,17 @@ struct ColorConfig {
     }
 };
 
-const ColorConfig DEFAULT_COLOR_WHITE = {255, 255, 255, 1.0f};
+const int DEFAULT_WIDTH = 600;
+const int DEFAULT_HEIGHT = 60;
+const int DEFAULT_PADDING = 5;
+const int DEFAULT_NUM_ITEMS = 5;
+const int DEFAULT_FONT_SIZE = 18;
+const int DEFAULT_BORDER_WIDTH = 1;
+const int DEFAULT_BORDER_RADIUS = 10;
+const QString DEFAULT_TEXT = " Kiid Search";
+const QString DEFAULT_FONT = "Monospace";
 const ColorConfig DEFAULT_COLOR_BLACK = {0, 0, 0, 1.0f};
+const ColorConfig DEFAULT_COLOR_WHITE = {255, 255, 255, 1.0f};
 
 struct SearchBoxConfig {
     int width;
@@ -64,12 +73,12 @@ struct SearchBoxConfig {
 
     static SearchBoxConfig Load(const Json& json) {
         SearchBoxConfig config;
-        config.width = LoadFromJsonField(json, "width", 600);
-        config.height = LoadFromJsonField(json, "height", 60);
-        config.brd_width = LoadFromJsonField(json, "brd_width", 1);
-        config.brd_radius = LoadFromJsonField(json, "brd_radius", 10);
-        config.font_size = LoadFromJsonField(json, "font_size", 18);
-        config.padding = LoadFromJsonField(json, "paddings", 5);
+        config.width = LoadFromJsonField(json, "width", DEFAULT_WIDTH);
+        config.height = LoadFromJsonField(json, "height", DEFAULT_HEIGHT);
+        config.brd_width = LoadFromJsonField(json, "brd_width", DEFAULT_BORDER_WIDTH);
+        config.brd_radius = LoadFromJsonField(json, "brd_radius", DEFAULT_BORDER_RADIUS);
+        config.font_size = LoadFromJsonField(json, "font_size", DEFAULT_FONT_SIZE);
+        config.padding = LoadFromJsonField(json, "paddings", DEFAULT_PADDING);
         
         config.bg_color = json.contains("bg_color")
             ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
@@ -81,7 +90,7 @@ struct SearchBoxConfig {
             ? ColorConfig::Load(json.at("text_color")) : DEFAULT_COLOR_BLACK;
 
         config.text = json.contains("text")
-            ? QString::fromStdString(json.at("text").get<std::string>()) : " Kiid Search";
+            ? QString::fromStdString(json.at("text").get<std::string>()) : DEFAULT_TEXT;
         
         config.cs_string = config.CreateCSString(); 
 
@@ -90,16 +99,16 @@ struct SearchBoxConfig {
 
     static SearchBoxConfig Default() {
         SearchBoxConfig config;
-        config.width = 600;
-        config.height = 60;
-        config.brd_width = 1;
-        config.brd_radius = 10;
-        config.font_size = 18;
-        config.padding = 5;
+        config.width = DEFAULT_WIDTH;
+        config.height = DEFAULT_HEIGHT;
+        config.brd_width = DEFAULT_BORDER_WIDTH;
+        config.brd_radius = DEFAULT_BORDER_RADIUS;
+        config.font_size = DEFAULT_FONT_SIZE;
+        config.padding = DEFAULT_PADDING;
         config.bg_color = DEFAULT_COLOR_WHITE;
         config.brd_color = DEFAULT_COLOR_BLACK;
         config.text_color = DEFAULT_COLOR_BLACK;
-        config.text = " Kiid Search";
+        config.text = DEFAULT_TEXT;
         config.cs_string = config.CreateCSString(); 
 
         return config;
@@ -151,11 +160,11 @@ struct ResultsViewConfig {
 
     static ResultsViewConfig Load(const Json& json) {
         ResultsViewConfig config;
-        config.brd_width = LoadFromJsonField(json, "brd_width", 1);
-        config.brd_radius = LoadFromJsonField(json, "brd_radius", 10);
-        config.font_size = LoadFromJsonField(json, "font_size", 18);
-        config.padding = LoadFromJsonField(json, "padding", 5);
-        config.num_items = LoadFromJsonField(json, "num_items", 5);
+        config.brd_width = LoadFromJsonField(json, "brd_width", DEFAULT_BORDER_WIDTH);
+        config.brd_radius = LoadFromJsonField(json, "brd_radius", DEFAULT_BORDER_RADIUS);
+        config.font_size = LoadFromJsonField(json, "font_size", DEFAULT_FONT_SIZE);
+        config.padding = LoadFromJsonField(json, "padding", DEFAULT_PADDING);
+        config.num_items = LoadFromJsonField(json, "num_items", DEFAULT_NUM_ITEMS);
         
         config.bg_color = json.contains("bg_color")
             ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
@@ -183,11 +192,11 @@ struct ResultsViewConfig {
 
     static ResultsViewConfig Default() {
         ResultsViewConfig config;
-        config.brd_width = 1;
-        config.brd_radius = 10;
-        config.font_size = 18;
-        config.padding = 5;
-        config.num_items = 5;
+        config.brd_width = DEFAULT_BORDER_WIDTH;
+        config.brd_radius = DEFAULT_BORDER_RADIUS;
+        config.font_size = DEFAULT_FONT_SIZE;
+        config.padding = DEFAULT_PADDING;
+        config.num_items = DEFAULT_NUM_ITEMS;
         config.bg_color = DEFAULT_COLOR_WHITE;
         config.brd_color = DEFAULT_COLOR_BLACK;
         config.text_color = DEFAULT_COLOR_BLACK;
@@ -293,21 +302,21 @@ struct FontConfig {
     static FontConfig Load(const Json& json) {
         FontConfig config;
         config.font_name = json.contains("font_name")
-            ? QString::fromStdString(json.at("font_name").get<std::string>()) : "Monospace";
+            ? QString::fromStdString(json.at("font_name").get<std::string>()) : DEFAULT_FONT;
         return config;
     }
 
     static FontConfig Default() {
         FontConfig config;
-        config.font_name = "Monospace";
+        config.font_name = DEFAULT_FONT;
         return config;
     }
 };
 struct Config {
+    FontConfig font_config;
+    ScreenConfig screen_config;
     SearchBoxConfig sb_config;
     ResultsViewConfig rv_config;
-    ScreenConfig screen_config;
-    FontConfig font_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
