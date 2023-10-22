@@ -1,3 +1,4 @@
+#include "QtCore/qnamespace.h"
 #include <QtGui/QFontDatabase>
 #include <QtGui/QKeyEvent>
 
@@ -9,6 +10,12 @@
 
 namespace Kiid::Window {
 
+enum class KiidState {
+    APP_LAUNCH = 0,
+    CMD_LAUNCH = 1,
+    FILE_SEARCH = 2
+};
+
 class KiidWindow : public QWidget {
     Q_OBJECT
 
@@ -16,7 +23,8 @@ public:
     using Config = Config::Config;
     using Coordinates = KiidScreen::Coordinates;
 
-    KiidWindow(const Config& config) {
+    KiidWindow(const Config& config)
+        : m_config{config} {
         setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         this->setStyleSheet("background:transparent;");
         this->setAttribute(Qt::WA_TranslucentBackground);
@@ -28,7 +36,9 @@ public:
         m_layout->addStretch(1);
         m_layout->addWidget(m_results_view);
         m_screen = new KiidScreen(m_search_box);
-        SetupFonts(config.font_config);
+        SetupFonts(m_config.font_config);
+
+        this->StateTransition(KiidState::APP_LAUNCH);
 
         m_executor.LoadApplications();
 
@@ -42,6 +52,53 @@ public:
 
 private slots:
     void HandleSearch(const QString& text) {
+        switch (m_state) {
+        case KiidState::APP_LAUNCH:
+            AppSearch(text);
+            break;
+        case KiidState::CMD_LAUNCH:
+            break;
+        case KiidState::FILE_SEARCH:
+            break;
+        };
+    }
+
+    void keyPressEvent(QKeyEvent* event) {
+        switch (event->key()) {
+        case Qt::Key_Escape:
+            if (m_search_box->isDefaultState()) {
+                close();
+            } else {
+                m_results_view->clear();
+                m_search_box->clear();
+                this->StateTransition(KiidState::APP_LAUNCH);
+            }
+            break;
+        case Qt::Key_Return:
+            Execute();
+            break;
+        case Qt::Key_Tab:
+            m_results_view->SetActiveItem(1, 0);
+            break;
+        case Qt::Key_Backtab:
+            m_results_view->SetActiveItem(-1, m_results_view->count() - 1);
+            break;
+        case Qt::Key_Colon:
+            this->StateTransition(KiidState::CMD_LAUNCH);
+        case Qt::Key_Control:
+            // Control key segfaults when sent to search_box :shrug:
+            break;
+        case Qt::Key_Shift:
+            // Shift key segfaults when sent to search_box :shrug:
+            break;
+        default:
+            QApplication::sendEvent(m_search_box, event);
+            break;
+        }
+    }
+
+private:
+    void AppSearch(const QString& text) {
         QStringList results;
 
         if (!text.isEmpty()) {
@@ -59,63 +116,51 @@ private slots:
         results.isEmpty() ? m_results_view->hide() : m_results_view->show();
     }
 
-    void keyPressEvent(QKeyEvent* event) {
-        switch (event->key()) {
-        case Qt::Key_Escape:
-            if (m_results_view->count() > 0) {
-                m_results_view->clear();
-                m_search_box->clear();
-            } else {
-                close();
-            }
+    void StateTransition(const KiidState& state) {
+        m_state = state;
+        Kiid::Config::ColorConfig state_color;
+        switch (m_state) {
+        case KiidState::APP_LAUNCH:
+            state_color = m_config.state_config.app_launch;
             break;
-        case Qt::Key_Return:
-            if (m_results_view->currentItem() != nullptr) {
-                Execute(m_results_view->currentItem()->text());
-            }
+        case KiidState::CMD_LAUNCH:
+            state_color = m_config.state_config.cmd_launch;
             break;
-        case Qt::Key_Tab:
-        {
-            int nextRow = m_results_view->currentRow() + 1;
-            if (nextRow >= m_results_view->count()) { nextRow = 0; }
-            m_results_view->setCurrentRow(nextRow);
+        case KiidState::FILE_SEARCH:
+            state_color = m_config.state_config.file_search;
             break;
         }
-        case Qt::Key_Backtab:
-        {
-            int nextRow = m_results_view->currentRow() - 1;
-            if (nextRow < 0) { nextRow = m_results_view->count() - 1; }
-            m_results_view->setCurrentRow(nextRow);
-            break;
-        }
-        case Qt::Key_Shift:
-            // Shift key segfaults when sent to search_box :shrug:
-            break;
-        default:
-            QApplication::sendEvent(m_search_box, event);
-            break;
-        }
+        m_search_box->UpdateBorder(state_color.r, state_color.g, state_color.b, state_color.opacity);
+        m_results_view->UpdateBorder(state_color.r, state_color.g, state_color.b, state_color.opacity);
     }
 
-private:
     void SetupFonts(const Kiid::Config::FontConfig& config) {
-        // ShowAvailableFonts();
         m_search_box->setFont(config.font_name);
         m_results_view->setFont(config.font_name);
     }
 
-    void ShowAvailableFonts() {
-        QStringList fontFamilies = QFontDatabase::families();
-
-        for(const QString& family : fontFamilies) {
-            qDebug() << "Available font:" << family;
+    void Execute() {
+        switch (m_state) {
+        case KiidState::APP_LAUNCH:
+        {
+            if (m_results_view->currentItem() == nullptr) { break; }
+            auto app_name = m_results_view->currentItem()->text();
+            auto app = m_executor.GetAppByName(app_name.toStdString());
+            int result = (*app).Execute();
+            if (!result) { close(); }
+            break;
         }
-    }
-
-    void Execute(const QString& app_name) {
-        auto app = m_executor.GetAppByName(app_name.toStdString());
-        int result = (*app).Execute();
-        if (!result) { close(); }
+        case KiidState::CMD_LAUNCH:
+        {
+            if (m_search_box->text().isEmpty()) { break; }
+            auto cmd = m_search_box->text();
+            close();
+            int result = m_executor.Execute(cmd.toStdString());
+            break;
+        }
+        case KiidState::FILE_SEARCH:
+            break;
+        }
     }
 
 private:
@@ -125,6 +170,8 @@ private:
     KiidResultsView* m_results_view;
 
     Kiid::Executor::Executor m_executor{};
+    Kiid::Config::Config m_config;
+    KiidState m_state = KiidState::APP_LAUNCH;
 };
 
 } // namespace Kiid::Window

@@ -34,6 +34,29 @@ public:
         return *this;
     }
 
+    void SetActiveItem(const int& inc, const int& fallback) {
+        int nextRow = this->currentRow() + inc;
+        if (nextRow >= this->count()) { nextRow = fallback; }
+        this->setCurrentRow(nextRow);
+    }
+
+    void UpdateBorder(const int& r,
+                      const int& g,
+                      const int& b,
+                      const float& opacity) {
+        QString currentStyleSheet = this->styleSheet();
+        QString newBorder = QString(
+            "border: %1px solid rgba(%2, %3, %4, %5);"
+        )
+        .arg(m_config.brd_width)
+        .arg(r)
+        .arg(g)
+        .arg(b)
+        .arg(opacity);
+        QString updatedStyleSheet = currentStyleSheet.replace(QRegularExpression("border: [^;]*;"), newBorder);
+        this->setStyleSheet(updatedStyleSheet);
+    }
+
 private:
     void Setup(const ResultsViewConfig& config) {
         this->setVerticalScrollBarPolicy(config.v_scroll_bar);

@@ -31,6 +31,17 @@ public:
         return *this;
     }
 
+public:
+    static int Execute(const std::string& cmd) {
+        std::string terminal_cmd = "kitty -e bash -c '" + cmd + "; exec bash'";
+        return system(terminal_cmd.c_str());
+    }
+
+    static int ExecuteQuite(const std::string& cmd) {
+        std::string bg_cmd = cmd + " &";
+        return system(bg_cmd.c_str());
+    }
+
     void LoadApplications(const std::filesystem::path& path = DEFAULT_APP_DIR) {
         if (!std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
             return;
@@ -60,16 +71,12 @@ public:
         return m_applications.at(app_name);
     }
 
+private:
     static std::string toLower(const std::string& str) {
         std::string lower = str;
         std::transform(lower.begin(), lower.end(), lower.begin(),
                        [](unsigned char c) { return std::tolower(c); });
         return lower;
-    }
-
-    static int Execute(const std::string& cmd) {
-        std::string bg_cmd = cmd + " &";
-        return system(bg_cmd.c_str());
     }
 
 private:

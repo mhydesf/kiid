@@ -3,8 +3,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <fmt/format.h>
 #include <nlohmann/json.hpp>
+
 #include <QtCore/QString>
 #include <QtCore/qnamespace.h>
 
@@ -55,6 +55,9 @@ const QString DEFAULT_TEXT = " Kiid Search";
 const QString DEFAULT_FONT = "Monospace";
 const ColorConfig DEFAULT_COLOR_BLACK = {0, 0, 0, 1.0f};
 const ColorConfig DEFAULT_COLOR_WHITE = {255, 255, 255, 1.0f};
+const ColorConfig DEFAULT_COLOR_RED = {255, 0, 0, 1.0f};
+const ColorConfig DEFAULT_COLOR_GREEN = {0, 255, 0, 1.0f};
+const ColorConfig DEFAULT_COLOR_BLUE = {0, 0, 255, 1.0f};
 
 struct SearchBoxConfig {
     int width;
@@ -65,7 +68,6 @@ struct SearchBoxConfig {
     int padding;
 
     ColorConfig bg_color;
-    ColorConfig brd_color;
     ColorConfig text_color;
 
     QString text;
@@ -82,9 +84,6 @@ struct SearchBoxConfig {
         
         config.bg_color = json.contains("bg_color")
             ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
-        
-        config.brd_color = json.contains("brd_color")
-            ? ColorConfig::Load(json.at("brd_color")) : DEFAULT_COLOR_BLACK;
         
         config.text_color = json.contains("text_color")
             ? ColorConfig::Load(json.at("text_color")) : DEFAULT_COLOR_BLACK;
@@ -106,7 +105,6 @@ struct SearchBoxConfig {
         config.font_size = DEFAULT_FONT_SIZE;
         config.padding = DEFAULT_PADDING;
         config.bg_color = DEFAULT_COLOR_WHITE;
-        config.brd_color = DEFAULT_COLOR_BLACK;
         config.text_color = DEFAULT_COLOR_BLACK;
         config.text = DEFAULT_TEXT;
         config.cs_string = config.CreateCSString(); 
@@ -118,11 +116,11 @@ struct SearchBoxConfig {
         return QString(
             "QLineEdit {"
                 "background-color: rgba(%1, %2, %3, %4);"
-                "border: %5px solid rgba(%6, %7, %8, %9);"
-                "border-radius: %10px;"
-                "padding: %11px;"
-                "font-size: %12px;"
-                "color: rgb(%13, %14, %15)"
+                "border: %5px solid rgba(0, 0, 0, 0.0);"
+                "border-radius: %6px;"
+                "padding: %7px;"
+                "font-size: %8px;"
+                "color: rgb(%9, %10, %11)"
             "}"
         )
         .arg(bg_color.r)
@@ -130,10 +128,6 @@ struct SearchBoxConfig {
         .arg(bg_color.b)
         .arg(bg_color.opacity)
         .arg(brd_width)
-        .arg(brd_color.r)
-        .arg(brd_color.g)
-        .arg(brd_color.b)
-        .arg(brd_color.opacity)
         .arg(brd_radius)
         .arg(padding)
         .arg(font_size)
@@ -151,7 +145,6 @@ struct ResultsViewConfig {
     int num_items;
 
     ColorConfig bg_color;
-    ColorConfig brd_color;
     ColorConfig text_color;
 
     QString cs_string;
@@ -168,9 +161,6 @@ struct ResultsViewConfig {
         
         config.bg_color = json.contains("bg_color")
             ? ColorConfig::Load(json.at("bg_color")) : DEFAULT_COLOR_WHITE;
-        
-        config.brd_color = json.contains("brd_color")
-            ? ColorConfig::Load(json.at("brd_color")) : DEFAULT_COLOR_BLACK;
         
         config.text_color = json.contains("text_color")
             ? ColorConfig::Load(json.at("text_color")) : DEFAULT_COLOR_BLACK;
@@ -198,7 +188,6 @@ struct ResultsViewConfig {
         config.padding = DEFAULT_PADDING;
         config.num_items = DEFAULT_NUM_ITEMS;
         config.bg_color = DEFAULT_COLOR_WHITE;
-        config.brd_color = DEFAULT_COLOR_BLACK;
         config.text_color = DEFAULT_COLOR_BLACK;
         config.cs_string = config.CreateCSString();
         config.v_scroll_bar = Qt::ScrollBarAlwaysOff;
@@ -211,13 +200,13 @@ struct ResultsViewConfig {
         return QString(
             "QListWidget {"
                 "background-color: rgba(%1, %2, %3, %4);"
-                "border: %5px solid rgba(%6, %7, %8, %9);"
-                "border-radius: %10px;"
-                "padding: %11px;"
-                "font-size: %12px;"
+                "border: %5px solid rgba(0, 0, 0, 0.0);"
+                "border-radius: %6px;"
+                "padding: %7px;"
+                "font-size: %8px;"
             "}"
             "QListWidget::item {"
-                "color: rgb(%13, %14, %15)"
+                "color: rgb(%9, %10, %11)"
             "}"
         )
         .arg(bg_color.r)
@@ -225,10 +214,6 @@ struct ResultsViewConfig {
         .arg(bg_color.b)
         .arg(bg_color.opacity)
         .arg(brd_width)
-        .arg(brd_color.r)
-        .arg(brd_color.g)
-        .arg(brd_color.b)
-        .arg(brd_color.opacity)
         .arg(brd_radius)
         .arg(padding)
         .arg(font_size)
@@ -310,11 +295,38 @@ struct FontConfig {
         return config;
     }
 };
+
+struct StateColorConfig {
+    ColorConfig app_launch;
+    ColorConfig cmd_launch;
+    ColorConfig file_search;
+
+    static StateColorConfig Load(const Json& json = Json{}) {
+        StateColorConfig config;
+        config.app_launch = json.contains("app_launch")
+            ? ColorConfig::Load(json.at("app_launch")) : DEFAULT_COLOR_RED;
+        config.cmd_launch = json.contains("cmd_launch")
+            ? ColorConfig::Load(json.at("cmd_launch")) : DEFAULT_COLOR_GREEN;
+        config.file_search = json.contains("file_search")
+            ? ColorConfig::Load(json.at("file_search")) : DEFAULT_COLOR_BLUE;
+        return config;
+    }
+
+    static StateColorConfig Default() {
+        StateColorConfig config;
+        config.app_launch = DEFAULT_COLOR_RED;
+        config.cmd_launch = DEFAULT_COLOR_GREEN;
+        config.file_search = DEFAULT_COLOR_BLUE;
+        return config;
+    }
+};
+
 struct Config {
     FontConfig font_config;
     ScreenConfig screen_config;
     SearchBoxConfig sb_config;
     ResultsViewConfig rv_config;
+    StateColorConfig state_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
@@ -326,6 +338,8 @@ struct Config {
                                 : ScreenConfig::Default();
         config.font_config = json.contains("font") ? FontConfig::Load(json.at("font"))
                                 : FontConfig::Default();
+        config.state_config = json.contains("state_config") ? StateColorConfig::Load(json.at("state_config"))
+                                : StateColorConfig::Default();
 
         return config;
     }
