@@ -13,6 +13,12 @@ namespace Kiid::Config {
 using Json = nlohmann::json;
 
 template <typename T>
+concept Configuration = requires {
+    { T::Load(std::declval<const Json&>()) } -> std::same_as<T>;
+    { T::Default() } -> std::same_as<T>;
+};
+
+template <typename T>
 T LoadFromJsonField(const Json& json, const std::string& key, const T& _default) {
     return json.contains(key) ? json.at(key).get<T>() : _default;
 }
@@ -33,16 +39,17 @@ struct ColorConfig {
         return config;
     }
 
-    static ColorConfig Default(const int r, const int g, const int b) {
+    static ColorConfig Default() {
         ColorConfig config;
-        config.r = r;
-        config.g = g;
-        config.b = b;
+        config.r = 0;
+        config.g = 0;
+        config.b = 0;
         config.opacity = 1.0;
 
         return config;
     }
 };
+static_assert(Configuration<ColorConfig>);
 
 const int DEFAULT_WIDTH = 600;
 const int DEFAULT_HEIGHT = 60;
@@ -53,7 +60,7 @@ const int DEFAULT_BORDER_WIDTH = 1;
 const int DEFAULT_BORDER_RADIUS = 10;
 const QString DEFAULT_TEXT = " Kiid Search";
 const QString DEFAULT_FONT = "Monospace";
-const ColorConfig DEFAULT_COLOR_BLACK = {0, 0, 0, 1.0f};
+const ColorConfig DEFAULT_COLOR_BLACK = ColorConfig::Default();
 const ColorConfig DEFAULT_COLOR_WHITE = {255, 255, 255, 1.0f};
 const ColorConfig DEFAULT_COLOR_RED = {255, 0, 0, 1.0f};
 const ColorConfig DEFAULT_COLOR_GREEN = {0, 255, 0, 1.0f};
@@ -136,6 +143,7 @@ struct SearchBoxConfig {
         .arg(text_color.b);
     }
 };
+static_assert(Configuration<SearchBoxConfig>);
 
 struct ResultsViewConfig {
     int brd_width;
@@ -222,6 +230,7 @@ struct ResultsViewConfig {
         .arg(text_color.b);
     };
 };
+static_assert(Configuration<ResultsViewConfig>);
 
 struct ScreenConfig {
     /**
@@ -278,6 +287,7 @@ struct ScreenConfig {
         return config;
     }
 };
+static_assert(Configuration<ScreenConfig>);
 
 struct FontConfig {
     QString font_name;
@@ -295,6 +305,7 @@ struct FontConfig {
         return config;
     }
 };
+static_assert(Configuration<FontConfig>);
 
 struct StateColorConfig {
     ColorConfig app_launch;
@@ -320,6 +331,7 @@ struct StateColorConfig {
         return config;
     }
 };
+static_assert(Configuration<StateColorConfig>);
 
 struct Config {
     FontConfig font_config;
@@ -343,7 +355,6 @@ struct Config {
 
         return config;
     }
-
 };
 
 static inline std::string LoadConfigPath() {
