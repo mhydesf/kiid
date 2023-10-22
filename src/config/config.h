@@ -281,8 +281,6 @@ struct ScreenConfig {
         } else {
             config.p_vertical = -1;
         }
-        config.p_horizontal = json.contains("p_horizontal") ? json.at("p_horizontal").get<int>() : 1;
-        config.p_vertical = json.contains("p_vertical") ? json.at("p_vertical").get<int>() : 10;
 
         return config;
     }
