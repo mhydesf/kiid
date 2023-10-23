@@ -40,8 +40,6 @@ public:
 
         this->StateTransition(KiidState::APP_LAUNCH);
 
-        m_executor.LoadApplications();
-
         connect(m_search_box, &QLineEdit::textChanged, this, &KiidWindow::HandleSearch);
         
         const int hor = config.screen_config.p_horizontal;
@@ -57,6 +55,7 @@ private slots:
             AppSearch(text);
             break;
         case KiidState::CMD_LAUNCH:
+            // no searching when launching commands
             break;
         case KiidState::FILE_SEARCH:
             break;
@@ -66,13 +65,7 @@ private slots:
     void keyPressEvent(QKeyEvent* event) {
         switch (event->key()) {
         case Qt::Key_Escape:
-            if (m_search_box->isDefaultState()) {
-                close();
-            } else {
-                m_results_view->clear();
-                m_search_box->clear();
-                this->StateTransition(KiidState::APP_LAUNCH);
-            }
+            ProcessSearchBoxExit();
             break;
         case Qt::Key_Return:
             Execute();
@@ -83,8 +76,15 @@ private slots:
         case Qt::Key_Backtab:
             m_results_view->SetActiveItem(-1, m_results_view->count() - 1);
             break;
+        case Qt::Key_AsciiTilde:
+            this->StateTransition(KiidState::APP_LAUNCH);
+            break;
         case Qt::Key_Colon:
             this->StateTransition(KiidState::CMD_LAUNCH);
+            break;
+        case Qt::Key_Question:
+            this->StateTransition(KiidState::FILE_SEARCH);
+            break;
         case Qt::Key_Control:
             // Control key segfaults when sent to search_box :shrug:
             break;
@@ -98,22 +98,28 @@ private slots:
     }
 
 private:
-    void AppSearch(const QString& text) {
-        QStringList results;
-
-        if (!text.isEmpty()) {
-            std::vector<std::string> resp = m_executor.GetHits(text.toStdString());
-            for (const auto& r : resp) {
-                results.push_back(QString::fromStdString(r));
-            }
+    void Execute() {
+        switch (m_state) {
+        case KiidState::APP_LAUNCH:
+        {
+            if (m_results_view->currentItem() == nullptr) { break; }
+            auto app_name = m_results_view->currentItem()->text();
+            auto app = m_executor.GetAppByName(app_name.toStdString());
+            (*app).Execute();
+            close();
+            break;
         }
-        
-        if (!results.empty()) {
-            m_results_view->clear();
-            m_results_view->addItems(results);
+        case KiidState::CMD_LAUNCH:
+        {
+            if (m_search_box->text().isEmpty()) { break; }
+            auto cmd = m_search_box->text();
+            close();
+            m_executor.Execute(cmd.toStdString());
+            break;
         }
-        
-        results.isEmpty() ? m_results_view->hide() : m_results_view->show();
+        case KiidState::FILE_SEARCH:
+            break;
+        }
     }
 
     void StateTransition(const KiidState& state) {
@@ -134,33 +140,37 @@ private:
         m_results_view->UpdateBorder(state_color.r, state_color.g, state_color.b, state_color.opacity);
     }
 
+    void ProcessSearchBoxExit() {
+        if (m_search_box->isDefaultState()) {
+            close();
+        } else {
+            m_results_view->clear();
+            m_search_box->clear();
+            this->StateTransition(KiidState::APP_LAUNCH);
+        }
+    }
+
+    void AppSearch(const QString& text) {
+        QStringList results;
+
+        if (!text.isEmpty()) {
+            std::vector<std::string> resp = m_executor.GetHits(text.toStdString());
+            for (const auto& r : resp) {
+                results.push_back(QString::fromStdString(r));
+            }
+        }
+        
+        if (!results.empty()) {
+            m_results_view->clear();
+            m_results_view->addItems(results);
+        }
+        
+        results.isEmpty() ? m_results_view->hide() : m_results_view->show();
+    }
+
     void SetupFonts(const Kiid::Config::FontConfig& config) {
         m_search_box->setFont(config.font_name);
         m_results_view->setFont(config.font_name);
-    }
-
-    void Execute() {
-        switch (m_state) {
-        case KiidState::APP_LAUNCH:
-        {
-            if (m_results_view->currentItem() == nullptr) { break; }
-            auto app_name = m_results_view->currentItem()->text();
-            auto app = m_executor.GetAppByName(app_name.toStdString());
-            int result = (*app).Execute();
-            if (!result) { close(); }
-            break;
-        }
-        case KiidState::CMD_LAUNCH:
-        {
-            if (m_search_box->text().isEmpty()) { break; }
-            auto cmd = m_search_box->text();
-            close();
-            int result = m_executor.Execute(cmd.toStdString());
-            break;
-        }
-        case KiidState::FILE_SEARCH:
-            break;
-        }
     }
 
 private:
