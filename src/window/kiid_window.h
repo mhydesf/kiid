@@ -64,6 +64,7 @@ private slots:
     }
 
     void keyPressEvent(QKeyEvent* event) {
+        using Direction = Kiid::Window::KiidResultsView::SelectionDirection;
         switch (event->key()) {
         case Qt::Key_Escape:
             ProcessSearchBoxExit();
@@ -72,10 +73,10 @@ private slots:
             Execute();
             break;
         case Qt::Key_Tab:
-            m_results_view->SetActiveItem(1, 0);
+            m_results_view->SetActiveItem(Direction::FORWARD, 1, 0);
             break;
         case Qt::Key_Backtab:
-            m_results_view->SetActiveItem(-1, m_results_view->count() - 1);
+            m_results_view->SetActiveItem(Direction::BACKWARD, 1, m_results_view->count() - 1);
             break;
         case Qt::Key_AsciiTilde:
             this->StateTransition(KiidState::APP_LAUNCH);

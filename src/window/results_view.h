@@ -11,6 +11,7 @@ class KiidResultsView : public QListWidget {
 
 public:
     using ResultsViewConfig = Config::ResultsViewConfig;
+    enum class SelectionDirection { FORWARD = 0, BACKWARD };
 
     KiidResultsView(const ResultsViewConfig& config,
                     QWidget* parent = nullptr)
@@ -34,10 +35,24 @@ public:
         return *this;
     }
 
-    void SetActiveItem(const int& inc, const int& fallback) {
-        int nextRow = this->currentRow() + inc;
-        if (nextRow >= this->count()) { nextRow = fallback; }
-        this->setCurrentRow(nextRow);
+    void SetActiveItem(SelectionDirection dir, const int& inc, const int& fallback) {
+        int nextRow;
+        switch (dir) {
+        case SelectionDirection::FORWARD:
+        {
+            nextRow = this->currentRow() + inc;
+            if (nextRow >= this->count()) { nextRow = fallback; }
+            this->setCurrentRow(nextRow);
+            break;
+        }
+        case SelectionDirection::BACKWARD:
+        {
+            nextRow = this->currentRow() - inc;
+            if (nextRow < 0) { nextRow = fallback; }
+            this->setCurrentRow(nextRow);
+            break;
+        }
+        }
     }
 
     void UpdateBorder(const int& r,
