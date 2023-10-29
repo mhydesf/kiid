@@ -65,6 +65,12 @@ private slots:
 
     void keyPressEvent(QKeyEvent* event) {
         using Direction = Kiid::Window::KiidResultsView::SelectionDirection;
+
+        if (isModifier(event->key())) {
+            // modifier keys can't be passed through to QLineEdit
+            return;
+        }
+
         switch (event->key()) {
         case Qt::Key_Escape:
             ProcessSearchBoxExit();
@@ -86,12 +92,6 @@ private slots:
             break;
         case Qt::Key_Question:
             this->StateTransition(KiidState::FILE_SEARCH);
-            break;
-        case Qt::Key_Control:
-            // Control key segfaults when sent to search_box :shrug:
-            break;
-        case Qt::Key_Shift:
-            // Shift key segfaults when sent to search_box :shrug:
             break;
         default:
             QApplication::sendEvent(m_search_box, event);
@@ -173,6 +173,13 @@ private:
     void SetupFonts(const Kiid::Config::FontConfig& config) {
         m_search_box->setFont(config.font_name);
         m_results_view->setFont(config.font_name);
+    }
+
+    bool isModifier(const int& key) {
+        return key == Qt::Key_Control || key == Qt::Key_Shift || 
+               key == Qt::Key_Alt || key == Qt::Key_Meta || 
+               key == Qt::Key_CapsLock || key == Qt::Key_NumLock || 
+               key == Qt::Key_ScrollLock;
     }
 
 private:
