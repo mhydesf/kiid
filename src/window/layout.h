@@ -3,14 +3,17 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtCore/qtmetamacros.h>
 
+#include <config/config.h>
+
 namespace Kiid::Window {
 
 class KiidLayout : public QVBoxLayout {
     Q_OBJECT
 
 public:
-    KiidLayout(QWidget* parent = nullptr)
-        : QVBoxLayout(parent)
+    KiidLayout(Kiid::Config::LayoutConfig config, QWidget* parent = nullptr)
+        : m_config{config}
+        , QVBoxLayout(parent)
     {
         Setup();
     }
@@ -30,8 +33,16 @@ public:
 
 private:
     void Setup() {
-        this->setContentsMargins(5, 5, 5, 5);
+        this->setContentsMargins(
+            m_config.left,
+            m_config.top,
+            m_config.right,
+            m_config.bottom
+        );
     }
+
+private:
+    Kiid::Config::LayoutConfig m_config;
 };
 
 } // namespace Kiid::Window

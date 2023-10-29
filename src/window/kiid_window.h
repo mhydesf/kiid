@@ -30,7 +30,7 @@ public:
         this->setStyleSheet("background:transparent;");
         this->setAttribute(Qt::WA_TranslucentBackground);
         
-        m_layout = new KiidLayout(this);
+        m_layout = new KiidLayout(config.layout_config, this);
         m_search_box = new KiidSearchBox(config.sb_config, this);
         m_results_view = new KiidResultsView(config.rv_config, this);
         m_layout->addWidget(m_search_box);

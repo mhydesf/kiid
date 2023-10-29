@@ -356,6 +356,34 @@ struct ExecutorConfig {
 };
 static_assert(Configuration<ExecutorConfig>);
 
+struct LayoutConfig {
+    int left;
+    int top;
+    int right;
+    int bottom;
+
+    static LayoutConfig Load(const Json& json) {
+        LayoutConfig config;
+        config.left = LoadFromJsonField(json, "left", 5);
+        config.top = LoadFromJsonField(json, "top", 5);
+        config.right = LoadFromJsonField(json, "right", 5);
+        config.bottom = LoadFromJsonField(json, "bottom", 5);
+
+        return config;
+    }
+
+    static LayoutConfig Default() {
+        LayoutConfig config;
+        config.left = 5;
+        config.top = 5;
+        config.right = 5;
+        config.bottom = 5;
+
+        return config;
+    }
+};
+static_assert(Configuration<LayoutConfig>);
+
 struct Config {
     FontConfig font_config;
     ScreenConfig screen_config;
@@ -363,6 +391,7 @@ struct Config {
     ResultsViewConfig rv_config;
     StateColorConfig state_config;
     ExecutorConfig exec_config;
+    LayoutConfig layout_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
@@ -378,6 +407,8 @@ struct Config {
                                 : StateColorConfig::Default();
         config.exec_config = json.contains("executor") ? ExecutorConfig::Load(json.at("executor"))
                                 : ExecutorConfig::Default();
+        config.layout_config = json.contains("layout") ? LayoutConfig::Load(json.at("layout"))
+                                : LayoutConfig::Default();
 
         return config;
     }
