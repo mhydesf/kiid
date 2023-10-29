@@ -5,8 +5,10 @@
 #include <string>
 #include <functional>
 #include <filesystem>
+#include <fmt/format.h>
 
 #include "app.h"
+#include "config/config.h"
 
 namespace Kiid::Executor {
 
@@ -14,7 +16,11 @@ static const std::string DEFAULT_APP_DIR = "/usr/share/applications/";
 
 class Executor {
 public:
-    Executor() { LoadApplications(); }
+    Executor(const Kiid::Config::ExecutorConfig& config)
+        : m_config{config}
+    {
+        LoadApplications();
+    }
 
     Executor(const Executor& other) = delete;
     Executor& operator=(const Executor& other) = delete;
@@ -32,12 +38,15 @@ public:
     }
 
 public:
-    static int Execute(const std::string& cmd) {
-        std::string terminal_cmd = "kitty -e bash -c '" + cmd + "; exec bash'";
+    int Execute(const std::string& cmd) {
+        if (isStandaloneCommand(cmd)) {
+            return ExecuteQuite(cmd);
+        }
+        std::string terminal_cmd = fmt::format("{} -e bash -c '{}; exec bash'", m_config.terminal, cmd);
         return system(terminal_cmd.c_str());
     }
 
-    static int ExecuteQuite(const std::string& cmd) {
+    int ExecuteQuite(const std::string& cmd) {
         std::string bg_cmd = cmd + " &";
         return system(bg_cmd.c_str());
     }
@@ -72,6 +81,10 @@ public:
     }
 
 private:
+    bool isStandaloneCommand(const std::string& cmd) {
+        return m_config.standalones.find(cmd) != m_config.standalones.end();
+    }
+
     static std::string toLower(const std::string& str) {
         std::string lower = str;
         std::transform(lower.begin(), lower.end(), lower.begin(),
@@ -80,6 +93,7 @@ private:
     }
 
 private:
+    Kiid::Config::ExecutorConfig m_config;
     std::map<std::string, std::shared_ptr<Application>> m_applications;
 };
 

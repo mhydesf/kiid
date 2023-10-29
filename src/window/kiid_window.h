@@ -24,7 +24,8 @@ public:
     using Coordinates = KiidScreen::Coordinates;
 
     KiidWindow(const Config& config)
-        : m_config{config} {
+        : m_config{config}
+        , m_executor{config.exec_config} {
         setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
         this->setStyleSheet("background:transparent;");
         this->setAttribute(Qt::WA_TranslucentBackground);
@@ -179,8 +180,8 @@ private:
     KiidSearchBox* m_search_box;
     KiidResultsView* m_results_view;
 
-    Kiid::Executor::Executor m_executor{};
     Kiid::Config::Config m_config;
+    Kiid::Executor::Executor m_executor;
     KiidState m_state = KiidState::APP_LAUNCH;
 };
 

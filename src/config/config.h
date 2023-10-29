@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <nlohmann/json.hpp>
 
 #include <QtCore/QString>
@@ -333,12 +334,35 @@ struct StateColorConfig {
 };
 static_assert(Configuration<StateColorConfig>);
 
+struct ExecutorConfig {
+    std::string terminal;
+    std::set<std::string> standalones;
+
+    static ExecutorConfig Load(const Json& json) {
+        ExecutorConfig config;
+        config.terminal = LoadFromJsonField(json, "terminal", std::string{"gnome-terminal"});
+        config.standalones = LoadFromJsonField(json, "standalones", std::set<std::string>{});
+
+        return config;
+    }
+
+    static ExecutorConfig Default() {
+        ExecutorConfig config;
+        config.terminal = "gnome-terminal";
+        config.standalones = {};
+
+        return config;
+    }
+};
+static_assert(Configuration<ExecutorConfig>);
+
 struct Config {
     FontConfig font_config;
     ScreenConfig screen_config;
     SearchBoxConfig sb_config;
     ResultsViewConfig rv_config;
     StateColorConfig state_config;
+    ExecutorConfig exec_config;
 
     static Config Load(const Json& json = Json{}) {
         Config config;
@@ -352,6 +376,8 @@ struct Config {
                                 : FontConfig::Default();
         config.state_config = json.contains("state_config") ? StateColorConfig::Load(json.at("state_config"))
                                 : StateColorConfig::Default();
+        config.exec_config = json.contains("executor") ? ExecutorConfig::Load(json.at("executor"))
+                                : ExecutorConfig::Default();
 
         return config;
     }
