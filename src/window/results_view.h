@@ -55,10 +55,10 @@ public:
         }
     }
 
-    void UpdateBorder(const int& r,
-                      const int& g,
-                      const int& b,
-                      const float& opacity) {
+    void UpdateBorderColor(const int& r,
+                           const int& g,
+                           const int& b,
+                           const float& opacity) {
         QString currentStyleSheet = this->styleSheet();
         QString newBorder = QString(
             "border: %1px solid rgba(%2, %3, %4, %5);"

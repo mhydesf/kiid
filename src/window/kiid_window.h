@@ -138,8 +138,8 @@ private:
             state_color = m_config.state_config.file_search;
             break;
         }
-        m_search_box->UpdateBorder(state_color.r, state_color.g, state_color.b, state_color.opacity);
-        m_results_view->UpdateBorder(state_color.r, state_color.g, state_color.b, state_color.opacity);
+        m_search_box->UpdateBorderColor(state_color.r, state_color.g, state_color.b, state_color.opacity);
+        m_results_view->UpdateBorderColor(state_color.r, state_color.g, state_color.b, state_color.opacity);
     }
 
     void ProcessSearchBoxExit() {
